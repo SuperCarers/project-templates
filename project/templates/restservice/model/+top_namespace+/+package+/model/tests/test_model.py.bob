@@ -1,0 +1,8 @@
+# -*- coding: utf-8 -*-
+import unittest
+
+#import pytest
+
+
+def test_my_code():
+    assert "Tests needed for: {{{namespaced_package}}}.model"

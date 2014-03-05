@@ -1,0 +1,25 @@
+{{{project}}}-service
+===================================
+
+.. contents::
+
+
+Introduction
+------------
+
+This provides the namespaced package: {{{namespaced_package}}}.service
+
+
+Testing
+-------
+
+Activate the dev environment and change into {{{project}}}-service.
+
+Run all tests
+~~~~~~~~~~~~~
+
+From here you can do::
+
+    python runtests.py -s
+
+

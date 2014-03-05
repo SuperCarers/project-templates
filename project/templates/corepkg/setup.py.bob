@@ -1,0 +1,73 @@
+# -*- coding: utf-8 -*-
+"""
+Setuptools script for {{{project}}} ({{{namespaced_package}}})
+
+"""
+from setuptools import setup, find_packages
+
+Name = '{{{project}}}'
+ProjectUrl = ""
+Version = "1.0.0dev"
+Author = ''
+AuthorEmail = ''
+Maintainer = ''
+Summary = 'Something useful for {{{project}}}'
+License = ''
+Description = Summary
+ShortDescription = Summary
+
+needed = [
+    'sphinx', # for docs generation.
+]
+
+test_needed = [
+]
+
+test_suite = '{{{namespaced_package}}}.tests'
+
+EagerResources = [
+    '{{{top}}}',
+]
+
+# Example including shell script out of scripts dir
+ProjectScripts = [
+#    '{{{namespaced_package}}}/scripts/somescript',
+]
+
+PackageData = {
+    '': ['*.*'],
+}
+
+# Web Entry points
+EntryPoints = """
+[console_scripts]
+      {{{package}}} = {{{namespaced_package}}}.scripts.main:main
+"""
+
+setup(
+    url=ProjectUrl,
+    name=Name,
+    zip_safe=False,
+    version=Version,
+    author=Author,
+    author_email=AuthorEmail,
+    description=ShortDescription,
+    long_description=Description,
+    classifiers=[
+      "Programming Language :: Python",
+      "Topic :: Internet :: WWW/HTTP",
+      "Topic :: Internet :: WWW/HTTP :: WSGI :: Application",
+    ],
+    keywords='web wsgi bfg pylons pyramid',
+    license=License,
+    scripts=ProjectScripts,
+    install_requires=needed,
+    tests_require=test_needed,
+    test_suite=test_suite,
+    include_package_data=True,
+    packages=find_packages(),
+    package_data=PackageData,
+    eager_resources=EagerResources,
+    entry_points=EntryPoints,
+    namespace_packages={{{namespace_packages}}},
+)

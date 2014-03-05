@@ -1,0 +1,214 @@
+#!/bin/bash
+#
+# This is the jenkins hookup to run the tests in a clean
+# environment. I expect python-setuptools and python-virtualenv
+# packages to be installed on the system.
+#
+VIRTUALENV=${VIRTUALENV:=virtualenv}
+BASKET=${BASKET:=-i http://eggproxy.pp.gb.com}
+PYENV=${PYENV:=pyenv}
+# this is inside the backend code
+ROOT_DIR=${ROOT_DIR:=`pwd`}
+NO_PYPI_PUBLISH=${NO_PYPI_PUBLISH:=1}
+NO_METRICS=${NO_METRICS:=1}
+
+
+function print_stage() {
+    # Make it easier to see which stage stdout output belongs to.
+    echo
+    echo "---------------------------------------------------------------------"
+    echo
+    echo $1
+    echo
+    echo "---------------------------------------------------------------------"
+    echo
+}
+
+
+function setup() {
+    # Create a clean environment without anything install fresh for testing:
+    #
+    $VIRTUALENV --system-site-packages ${PYENV}
+    source  ${PYENV}/bin/activate
+    if [ "$?" == 1 ];
+    then
+        echo "Error setting up virtual environment for tests!"
+        return 1
+    fi
+
+    # Install testing dependancies:
+    # sloccount is installed via puppet and in the path.
+    for dep in pytest pytest-cov sphinx pyflakes pylint clonedigger; do
+        $PYENV/bin/easy_install ${BASKET} $dep
+        if [ "$?" == 1 ];
+        then
+            echo "Error installing $dep!"
+            return 1
+        fi
+    done
+
+    # Manual set up of each of the package using out Egg cache:
+    #
+    # This uses the special pavement.py to correctly set up
+    # all profile service parts already.
+    #
+    cd $ROOT_DIR
+    $PYENV/bin/python setup.py develop ${BASKET} ;
+    if [ "$?" == 1 ];
+    then
+        echo "Error setting up package for test run!"
+        return 1
+    fi
+
+    return 0
+}
+
+
+function run_tests() {
+    # Run all tests inside the data directory:
+    #
+    cd $ROOT_DIR
+    $PYENV/bin/py.test \
+        --cov {{{namespaced_package}}}.model \
+        --cov {{{namespaced_package}}}.service \
+        --cov {{{namespaced_package}}}.client \
+        --ignore $PYENV \
+        -v \
+        --cov-report xml
+    if [ "$?" == 1 ];
+    then
+        echo "Error tests FAILED to run!"
+        return 1
+    fi
+}
+
+
+function run_metrics() {
+    #
+    cd $ROOT_DIR
+    print_stage "Running Code Metric."
+
+    if [ "$NO_METRICS" == 1 ];
+    then
+        echo "Local run. Code metrics disabled: NO_METRICS=1"
+    else
+        print_stage "Running sloccount."
+        sloccount --duplicates --wide --details . | fgrep -v .svn > sloccount.sc || :
+        if [ "$?" == 1 ];
+        then
+            echo "Error sloccount FAILED to run!"
+            return 1
+        fi
+
+        print_stage "Running pyflakes."
+        find . -type f -name '*.py'  | egrep -v '^./tests/' | egrep -v '*/build/' | xargs pyflakes  > pyflakes.log || :
+        if [ "$?" == 1 ];
+        then
+            echo "Error pyflakes FAILED to run!"
+            return 1
+        fi
+
+        print_stage "Running pylint."
+          rm -f pylint.log && for f in `find . -type f -name '*.py' | egrep -v '^./tests/' | egrep -v '*/build'`; do   pylint --output-format=parseable --reports=y $f >> pylint.log ; done || :
+        if [ "$?" == 1 ];
+        then
+            echo "Error pyflakes FAILED to run!"
+            return 1
+        fi
+
+        print_stage "Running clonedigger."
+        clonedigger --cpd-output . || :
+        if [ "$?" == 1 ];
+        then
+            echo "Error clonedigger FAILED to run!"
+            return 1
+        fi
+    fi
+}
+
+
+function build_dist() {
+    # Build the egg and source dist:
+    #
+    cd $ROOT_DIR
+    $PYENV/bin/python setup.py bdist_egg sdist
+    if [ "$?" == 1 ];
+    then
+        echo "Error source and egg dist generation FAILED!"
+        return 1
+    fi
+
+    return 0
+}
+
+
+function pypi_publish() {
+    # Move the eggs and sdist to our pypi on our own
+    #
+    cd $ROOT_DIR
+
+    if [ "$NO_PYPI_PUBLISH" == 1 ];
+    then
+        echo "Local test run. PYPI publish disabled: NO_PYPI_PUBLISH=1"
+    else
+        $PYENV/bin/python setup.py upload
+        if [ "$?" == 1 ];
+        then
+            echo "Error upload testing eggs to internal pypi!"
+            return 1
+        fi
+    fi
+
+    return 0
+}
+
+
+function tear_down() {
+    # clean up:
+    rm -rf $PYENV
+}
+
+
+function main() {
+    # Don't continue a step in fails.
+    print_stage "Set Up Environment."
+    setup
+    if [ "$?" == 1 ];
+    then
+        return 1
+    fi
+
+    print_stage  "Run Tests."
+    run_tests
+    if [ "$?" == 1 ];
+    then
+        return 1
+    fi
+
+    # Metrics prints out various stages.
+    # print_stage  "Run Code Metrics."
+    run_metrics
+    if [ "$?" == 1 ];
+    then
+        return 1
+    fi
+
+    print_stage "Build Release."
+    build_dist
+    if [ "$?" == 1 ];
+    then
+        return 1
+    fi
+
+   print_stage "Publish to Internal Cheeseshop."
+   pypi_publish
+   if [ "$?" == 1 ];
+   then
+       return 1
+   fi
+
+    print_stage "Tear Down Clean Up."
+    tear_down
+}
+
+main
