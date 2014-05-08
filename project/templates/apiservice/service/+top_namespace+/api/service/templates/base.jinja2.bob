@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+{% macro username() %}
+	{% if 'display_name' in request.environ['repoze.who.identity'] %}
+		{{ request.environ['repoze.who.identity']['display_name'] }}
+	{% else %}
+		{{ request.environ['repoze.who.identity']['repoze.who.userid'] }}
+	{% endif %}
+{% endmacro %}
+{% macro flash(msg, class) %}
+	<div class="alert alert-{{ class }} fade in">
+		{{ msg }}
+		<a class="close" data-dismiss="alert" href="#">&times;</a>
+	</div>
+{% endmacro %}
+<html lang="en">
+<head>
+    {% block head %}
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock %}</title>
+    <link rel="shortcut icon" href="{{ request.static_url('{{{top_namespace}}}.api.service:static/favicon.ico') }}"/>
+    <!-- CSS -->
+    <link rel="stylesheet" href="{{ request.static_url('{{{top_namespace}}}.api.service:static/lib/bootstrap/css/bootstrap.min.css') }}"/>
+    <link rel="stylesheet" href="{{ request.static_url('{{{top_namespace}}}.api.service:static/lib/bootstrap/css/datepicker.css') }}"/>
+    <link rel="stylesheet" href="{{ request.static_url('{{{top_namespace}}}.api.service:static/lib/font-awesome/css/font-awesome.min.css') }}"/>
+    <!--<link rel="stylesheet" href="{{ request.static_url('{{{top_namespace}}}.api.service:static/lib/bootstrap/css/bootstrap-responsive.min.css') }}"/>-->
+    <link rel="stylesheet" href="{{ request.static_url('{{{top_namespace}}}.api.service:static/css/styles.css') }}"/>
+    {% endblock %}
+</head>
+<body>
+  <div class="container">
+      <div class="row">
+          <div class="span12">
+              <div class="navbar">
+                  <div class="navbar-inner">
+                  	{% block navbar %}
+                    <a class="brand" href="/">{{ request.globals.org_or_title }}</a>
+                  	{% endblock %}
+                    <div class="pull-right">
+                        {% if 'repoze.who.identity' in request.environ.keys() %}
+                        <ul class="nav nav-tabs">
+                          <li class="dropdown">
+                            <a
+                                class="dropdown-toggle"
+                                data-toggle="dropdown"
+                                id="user_dropdown"
+                                href="#">
+                                 	<i class="icon-user"></i>
+                                    {{ username() }}
+                                    <b class="caret"></b>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a  id="user_profile"
+                                        href="{{ request.route_url('user_profile', username=request.environ['repoze.who.identity']['repoze.who.userid']) }}">
+                                 		<i class="icon-cog"></i>
+                                        Profile
+                                    </a>
+                                </li>
+                                <li><a id="logout_link" href="/logout">
+                             		<i class="icon-remove"></i>
+                                	Log Out
+                            	</a></li>
+                            </ul>
+                          </li>
+                        </ul>
+                        {% else %}
+                        <ul class="nav">
+                          <li><a id="signin_link" href="/login">Sign In</a></li>
+                        </ul>
+                        {% endif %}
+                    </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+      <div class="row">
+      	<div class="span12" id="flash-messages">
+      	{% for msg in request.session.pop_flash() %}
+	      {{ flash(msg, 'info') }}
+      	{% endfor %}
+      	{% for msg in request.session.pop_flash('success') %}
+	      {{ flash(msg, 'success') }}
+      	{% endfor %}
+      	{% for msg in request.session.pop_flash('error') %}
+	      {{ flash(msg, 'error') }}
+      	{% endfor %}
+        </div>
+      </div>
+      {% block content %}{% endblock %}
+  </div>
+    {% block footer %}
+    <div class="container">
+    <div class="row">
+      <div class="span12">
+        <footer>
+            <hr>
+            &copy; Copyright 2013-{{ request.globals.current_year }} by <a href="#">YourNameGoesHere.</a>.
+        </footer>
+      </div>
+    </div>
+    </div>
+    {% endblock %}
+  {% block javascript %}
+  <!-- JS -->
+  <script type="text/javascript" src="{{ request.static_url('{{{top_namespace}}}.api.service:static/lib/jquery/jquery-1.9.1.min.js') }}"></script>
+  <script type="text/javascript" src="{{ request.static_url('{{{top_namespace}}}.api.service:static/lib/lodash-min.js') }}"></script>
+  <script type="text/javascript" src="{{ request.static_url('{{{top_namespace}}}.api.service:static/lib/handlebars.js') }}"></script>
+  <script type="text/javascript" src="{{ request.static_url('{{{top_namespace}}}.api.service:static/lib/bootstrap/js/bootstrap.min.js') }}"></script>
+  <script type="text/javascript" src="{{ request.static_url('{{{top_namespace}}}.api.service:static/lib/less-min.js') }}"></script>
+  <script type="text/javascript" src="{{ request.static_url('{{{top_namespace}}}.api.service:static/lib/bootstrap/js/bootstrap-datepicker.js') }}"></script>
+  <script type="text/javascript" src="{{ request.static_url('{{{top_namespace}}}.api.service:static/lib/jquery.jqote2.js') }}"></script>
+  <script type="text/javascript" src="{{ request.static_url('{{{top_namespace}}}.api.service:static/lib/json2.js') }}"></script>
+  <script type="text/javascript" src="{{ request.static_url('{{{top_namespace}}}.api.service:static/lib/URI.min.js') }}"></script>
+  <script type="text/javascript" src="{{ request.static_url('{{{top_namespace}}}.api.service:static/js/jquery.bookingsys.js') }}"></script>
+  <script type="text/javascript" src="{{ request.static_url('{{{top_namespace}}}.api.service:static/js/jquery.util.js') }}"></script>
+  {% endblock %}
+</body>
+

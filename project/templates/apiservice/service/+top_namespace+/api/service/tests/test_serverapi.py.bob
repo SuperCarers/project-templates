@@ -1,0 +1,26 @@
+# -*- coding: utf-8 -*-
+"""
+Tests to verify the REST interface of the {{{top_namespace}}}-api-service.
+
+Oisin Mulvihill
+2013-10-06
+
+"""
+import pkg_resources
+
+
+def test_service_is_running(logger, test_server):
+    """Test the service is running and the status it returns.
+
+    """
+    # The pp-user-service and its api should be running and available:
+    test_server.user_svc.api.ping()
+
+    # Now check our own api
+    response = test_server.api.ping()
+
+    pkg = pkg_resources.get_distribution("{{{top_namespace}}}-api-service")
+
+    assert response["status"] == "ok"
+    assert response['name'] == "{{{top_namespace}}}-api-service"
+    assert response['version'] == pkg.version

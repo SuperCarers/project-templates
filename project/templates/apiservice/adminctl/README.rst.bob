@@ -1,0 +1,25 @@
+{{{top_namespace}}}-api-adminctl
+===================================
+
+.. contents::
+
+
+Introduction
+------------
+
+This provides the namespaced package: {{{top_namespace}}}.api.adminctl
+
+
+Testing
+-------
+
+Activate the dev environment and change into {{{top_namespace}}}-api-adminctl.
+
+Run all tests
+~~~~~~~~~~~~~
+
+From here you can do::
+
+    py.test -s
+
+

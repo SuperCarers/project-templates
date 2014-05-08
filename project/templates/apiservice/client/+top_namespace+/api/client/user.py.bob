@@ -1,0 +1,45 @@
+# -*- coding: utf-8 -*-
+"""
+This is the Public python client API that third parties would use.
+
+Created: {{{created}}}
+
+"""
+import logging
+from urlparse import urljoin
+
+import requests
+
+from {{{top_namespace}}}.api.client import utils
+from {{{top_namespace}}}.api.client.utils import json_response
+
+
+def get_log(e=None):
+    return logging.getLogger("{0}.{1}".format(__name__, e) if e else __name__)
+
+
+class User(object):
+    """Perform operations of user's of the system.
+
+    A valid access token will be required.
+
+    """
+    PROFILE = "/account/{}/"
+
+    def __init__(self, uri, get_auth):
+        self.log = get_log("User")
+        self.base_uri = uri
+        self.get_auth = get_auth
+
+    def details(self, username):
+        """Recover the details of a user on the system.
+
+        :param username: the unique user to recover details for.
+
+        """
+        uri = urljoin(self.base_uri, self.PROFILE.format(username))
+        self.log.debug("details: uri <{}>".format(uri))
+
+        return json_response(
+            requests.get(uri, headers=utils.JSON_CT, auth=self.get_auth())
+        )

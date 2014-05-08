@@ -1,0 +1,79 @@
+# -*- coding: utf-8 -*-
+"""
+
+Created: {{{created}}}
+
+
+"""
+import logging
+import pkg_resources
+
+import pyramid.httpexceptions as exc
+from pyramid.view import view_config
+
+from pp.web.base.restfulhelpers import json_result
+
+
+def get_log(e=None):
+    return logging.getLogger("{0}.{1}".format(__name__, e) if e else __name__)
+
+
+@view_config(route_name='api_login', request_method='POST', renderer='json')
+@view_config(route_name='api_login2', request_method='POST', renderer='json')
+@json_result
+def api_login(request):
+    """Login to recover the ACCESS_TOKEN for the user.
+
+    This will allow access to protected resources.
+
+    Multiple user tokens are not supported at this point. A user can only have
+    one token.
+
+    :returns: The ACCESS_TOKEN string to set on all REST API calls.
+
+    """
+    log = get_log("api_login")
+
+    user = request.user.api.user
+
+    username = request.matchdict['username'].strip()
+    log.debug("checking login <{0}>".format(username))
+
+    user_data = request.json_body
+    if 'password' not in user_data:
+        # 400: Bad Request for missing parameters which are required.
+        raise exc.exception_response(400)(
+            "The password field is missing!"
+        )
+
+    # The userservice should be on a private LAN and using HTTPS only,
+    # otherwise anyone could sniff the password!
+    log.debug("base64 decoding passwo{{{top_namespace}}}.")
+    password = user_data['password'].decode("base64")
+
+    log.debug("authenticating '{}' login details".format(username))
+    if user.authenticate(username, password):
+        log.debug("'{}' login OK. recovering access token.".format(username))
+        udict = user.get(username)
+        if 'tokens' in udict:
+            access_tokens = udict['tokens']
+            if access_tokens.keys():
+                log.warn(
+                    "Returning first token for user '{}'!".format(
+                        username
+                    )
+                )
+                access_token = access_tokens.keys()[0]
+
+        else:
+            log.warn(
+                "The user '{}' has no 'tokens' field in their data".format(
+                    username
+                )
+            )
+            raise exc.HTTPForbidden()
+
+    else:
+        raise exc.HTTPForbidden()
+
+    return access_token

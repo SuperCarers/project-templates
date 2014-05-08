@@ -1,0 +1,73 @@
+# -*- coding: utf-8 -*-
+"""
+{{{top_namespace}}}-api-service
+
+This provides the views which are used in the dispatch routing set up.
+
+"""
+import logging
+import pkg_resources
+
+from pyramid.view import view_config
+
+from pp.web.base.restfulhelpers import json_result
+
+
+def get_log(e=None):
+    return logging.getLogger("{0}.{1}".format(__name__, e) if e else __name__)
+
+
+@view_config(
+    route_name='home', request_method='GET',
+    accept="text/html", renderer='home.jinja2'
+)
+def home_page(request):
+    """The site root.
+    """
+    log = get_log("home_page")
+
+    rc = dict()
+    log.debug('here')
+
+    return rc
+
+
+@view_config(route_name='api_ping', request_method='GET', renderer='json')
+@view_config(route_name='api_ping2', request_method='GET', renderer='json')
+@json_result
+def status(request):
+    """This is used to 'ping' the web service to check if its running.
+
+    :returns: a status dict which the configured view will return as JSON.
+
+    The dict has the form::
+
+        dict(
+            status="ok",
+            name="<project name>",
+            version="<egg version of {{{top_namespace}}}.api.service>"
+        )
+
+    """
+    pkg = pkg_resources.get_distribution('{{{top_namespace}}}-api-service')
+
+    return dict(
+        status="ok",
+        name="{{{top_namespace}}}-api-service",
+        version=pkg.version,
+    )
+
+
+@view_config(
+    route_name='home', request_method='GET',
+    accept="text/html", renderer='home.jinja2'
+)
+def home_page(request):
+    """The site root.
+    """
+    log = get_log("home_page")
+
+    rc = dict()
+    log.debug('here')
+
+    return rc

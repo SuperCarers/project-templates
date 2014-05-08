@@ -1,0 +1,225 @@
+# -*- coding: utf-8 -*-
+"""
+AdminCtl will provide useful administration tool to manage the entire pypro
+"backend" ecosystem.
+
+Created: {{{created}}}
+
+"""
+import os
+import json
+import codecs
+import logging
+import ConfigParser
+
+import cmdln
+import requests
+
+
+class AdminCmds(cmdln.Cmdln):
+    """Usage:
+        adminctl -c / --config <config.ini> SUBCOMMAND [ARGS...]
+        adminctl help SUBCOMMAND
+
+    ${command_list}
+    ${help_list}
+
+    """
+    name = "adminctl"
+
+    def __init__(self, *args, **kwargs):
+        cmdln.Cmdln.__init__(self, *args, **kwargs)
+        self.log = logging.getLogger("%s.AdminCmds" % __name__)
+
+    def get_optparser(self):
+        """Parser for global options (that are not specific to a subcommand).
+        """
+        optparser = cmdln.CmdlnOptionParser(self)
+
+        optparser.add_option(
+            '-c', '--config', action='store',
+            dest="config_filename",
+            default="config.ini",
+            help='The global config file %default'
+        )
+
+        return optparser
+
+    def postoptparse(self):
+        """runs after parsing global options"""
+
+    @property
+    def config(self):
+        """Return a config instance when called.
+
+        Implement file change and reloading here?
+
+        """
+        cfg_filename = self.options.config_filename
+        rc = {}
+
+        if os.path.isfile(cfg_filename):
+            config = ConfigParser.ConfigParser()
+            self.log.debug("config: recovering from <%s>" % cfg_filename)
+            config.read(cfg_filename)
+            rc = dict(config.items(self.name))
+
+        else:
+            self.log.warn(
+                "confg: file not found <%s> using defaults." % cfg_filename
+            )
+
+        return rc
+
+    def do_ping(self, subcmd, opts, service):
+        """${cmd_name}: Check if the named service is running.
+
+        The service names available are: user.
+
+        ping user|all
+
+        If 'all' is used then each service will be pinged.
+
+        This looks for:
+
+            user.url (default: http://localhost:16801)
+
+        ${cmd_usage}
+        ${cmd_option_list}
+
+        """
+        cfg = self.config
+
+        from pp.user.client.rest import UserService
+
+        user_url = cfg.get('user.url', 'http://localhost:16801')
+        self.log.debug("ping: user service URL <%s>" % user_url)
+
+        SERVICES = {
+            'all': None,
+            'user': UserService(user_url),
+        }
+
+        service = service.lower().strip()
+        if service not in SERVICES.keys():
+            raise ValueError("Unknown '{}' it must one of '{}'!".format(
+                service,
+                SERVICES.keys()
+            ))
+
+        def _ping(svc):
+            try:
+                result = svc.ping()
+            except requests.exceptions.ConnectionError:
+                self.log.error("Unable to connect to '{}'.".format(svc))
+            else:
+                self.log.info("Connected to service OK: {}".format(result))
+
+        if service == "all":
+            for svc in SERVICES:
+                if svc != 'all':
+                    _ping(SERVICES[svc])
+        else:
+            _ping(SERVICES[service])
+
+    @cmdln.option(
+        "-d", "--deindent", action="store_true", dest="deindent",
+        default=False,
+        help="Don't indent the JSON written to file (default: %default)."
+    )
+    def do_dump(self, subcmd, opts, output):
+        """${cmd_name}: Dump the contents of all services as a backup.
+
+        The given file is over written.
+
+        ${cmd_usage}
+        ${cmd_option_list}
+
+        """
+        cfg = self.config
+        self.log.debug("dump: {} ".format(cfg))
+
+        from pp.user.client.rest import UserService
+
+        user_url = cfg.get('user.url', 'http://localhost:16801')
+        user = UserService(user_url)
+        user.ping()
+
+        kwargs = {}
+        if not opts.deindent:
+            self.log.debug("dump: indenting output.")
+            kwargs['indent'] = 4
+
+        to_dump = dict(
+            user=user.dump(),
+        )
+        json_data = json.dumps(to_dump, **kwargs)
+
+        with codecs.open(output, "w", encoding="utf-8") as fd:
+            fd.write(json_data)
+
+    def do_load(self, subcmd, opts, input_file):
+        """${cmd_name}: Load up the services from backup.
+
+        ${cmd_usage}
+        ${cmd_option_list}
+
+        """
+        cfg = self.config
+        self.log.debug("load: {} ".format(cfg))
+
+        from pp.user.client.rest import UserService
+
+        user_url = cfg.get('user.url', 'http://localhost:16801')
+        user = UserService(user_url)
+        user.ping()
+
+        with codecs.open(input_file, "r", encoding="utf-8") as fd:
+            json_data = fd.read()
+            data = json.loads(json_data)
+            user.load(data['user'])
+
+    def do_hash_password(self, subcmd, opts, plain_text):
+        """${cmd_name}: Generate the hash for a give passwo{{{top_namespace}}}.
+
+        ${cmd_usage}
+        ${cmd_option_list}
+
+        """
+        from pp.auth.pwtools import hash_password
+        print "Hashed password is:\n\t{}".format(hash_password(plain_text))
+
+    def do_generate_api_access_secret(self, subcmd, opts):
+        """${cmd_name}: Generate the api access secret for use with access
+        token generation.
+
+        This generates from urandom 16 bytes and converts to a hex string.
+
+        ${cmd_usage}
+        ${cmd_option_list}
+
+        """
+        from pp.apiaccesstoken.tokenmanager import Manager
+        print "New access secret is:\n\t{}".format(Manager.generate_secret())
+
+    def do_generate_api_access_token(
+        self, subcmd, opts, username, access_secret
+    ):
+        """${cmd_name}: Generate a token that could be used for API access.
+
+        The username is that of a user on the UserService. This is stored as
+        username in the token payload.
+
+        The secret is one generated using generate_api_access_secret.
+
+        This does not store or do anything other then print out a
+        generated token.
+
+        ${cmd_usage}
+        ${cmd_option_list}
+
+        """
+        from pp.apiaccesstoken.tokenmanager import Manager
+        man = Manager(access_secret)
+        at = man.generate_access_token(identity=username)
+        print "New token is:\n\t{}".format(at)

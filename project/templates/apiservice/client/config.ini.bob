@@ -1,0 +1,2 @@
+[adminctl]
+url = http://localhost:{{{tcp_port}}}

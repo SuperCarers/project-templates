@@ -1,0 +1,64 @@
+# -*- coding: utf-8 -*-
+"""
+This is the Public python client API that third parties would use.
+
+Helper function used in various part of the REST client lib.
+
+"""
+import logging
+
+from {{{top_namespace}}}.api.client import error
+
+
+def get_log(e=None):
+    return logging.getLogger("{0}.{1}".format(__name__, e) if e else __name__)
+
+
+# The header used to indicate we are sending JSON and expecting JSON responses
+# from the server API.
+JSON_CT = {'content-type': 'application/json'}
+
+
+def json_response(response):  # --> pp-
+                              # Unwrap json
+    """Take a requests.Response instance and check for HTTP and API errors.
+
+    :param response: A requests.Response instance.
+
+    :returns: The JSON data inside the data field.
+
+    If there is an error then APIServiceError will be raised.
+
+    """
+    log = get_log('json_response')
+
+    if response.status_code == 403:
+        raise error.AccessDenied()
+
+    elif response.status_code not in [200]:
+        log.error("HTTP status code not 200: {}: {}".format(
+            response.status_code,
+            response.content,
+        ))
+        raise error.APIServiceError(response.content[:20])
+
+    try:
+        api_response = response.json()
+
+    except ValueError:
+        log.error("no JSON body returned: {}".format(response.content))
+        raise error.APIServiceError(
+            "No JSON return when there should have been!"
+        )
+
+    else:
+        if api_response['success'] is False:
+            log.error("API error: {}".format(
+                response.content,
+            ))
+            raise error.APIServiceError(api_response['message'])
+
+        data = api_response['data']
+        log.debug("response OK: returning {}".format(repr(data)))
+
+    return data

@@ -1,0 +1,90 @@
+        # -*- coding: utf-8 -*-
+"""
+Setuptools script for {{{top_namespace}}}-api-model ({{{top_namespace}}}.api.model)
+
+"""
+
+from setuptools import setup, find_packages
+
+# Get the version from the source or the cached egg version:
+import json
+import ConfigParser
+cp = ConfigParser.ConfigParser()
+try:
+    cp.read('../eggs_version.ini')
+    version = dict(cp.items('default'))['version']
+except:
+    # inside and egg, read the cache version instead.
+    with file("cached_version.json", "r") as fd:
+        version = json.loads(fd.read())['egg_version']
+else:
+    # write out the version so its cached for in egg use:
+    with file("cached_version.json", "w") as fd:
+        fd.write(json.dumps(dict(egg_version=version)))
+
+
+Name = '{{{top_namespace}}}-api-adminctl'
+ProjectUrl = ""
+Version = version
+Author = ''
+AuthorEmail = ''
+Maintainer = ''
+Summary = ' {{{top_namespace}}}-api-adminctl '
+License = ''
+Description = Summary
+ShortDescription = Summary
+
+needed = [
+    'sphinx',  # for docs generation.
+    'evasion-common',
+    'requests',
+    'cmdln',
+]
+
+test_needed = [
+]
+
+test_suite = '{{{top_namespace}}}.api.adminctl.tests'
+
+EagerResources = [
+    '{{{top_namespace}}}',
+]
+
+ProjectScripts = [
+]
+
+PackageData = {
+    '': ['*.*'],
+}
+
+EntryPoints = {
+    'console_scripts': [
+        'adminctl = {{{top_namespace}}}.api.adminctl.main:main',
+    ],
+}
+
+
+setup(
+    url=ProjectUrl,
+    name=Name,
+    zip_safe=False,
+    version=Version,
+    author=Author,
+    author_email=AuthorEmail,
+    description=ShortDescription,
+    long_description=Description,
+    classifiers=[
+        "Programming Language :: Python",
+    ],
+    license=License,
+    scripts=ProjectScripts,
+    install_requires=needed,
+    tests_require=test_needed,
+    test_suite=test_suite,
+    include_package_data=True,
+    packages=find_packages(),
+    package_data=PackageData,
+    eager_resources=EagerResources,
+    entry_points=EntryPoints,
+    namespace_packages=['{{{top_namespace}}}', '{{{top_namespace}}}.api'],
+)

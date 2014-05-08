@@ -1,0 +1,24 @@
+{{{top_namespace}}}-api-service
+===================================
+
+.. contents::
+
+
+Introduction
+------------
+
+This provides the namespaced package: {{{top_namespace}}}.api.service
+
+
+Testing
+-------
+
+Activate the dev environment and change into {{{top_namespace}}}-api-service.
+
+Run all tests
+~~~~~~~~~~~~~
+
+From here you can do::
+
+    py.test -s
+

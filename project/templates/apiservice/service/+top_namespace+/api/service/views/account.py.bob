@@ -1,0 +1,75 @@
+# -*- coding: utf-8 -*-
+"""
+"""
+import logging
+
+from pyramid.view import view_config
+from pp.web.base.restfulhelpers import json_result
+
+from {{{top_namespace}}}.api.service.authorisation import user_for_login
+from {{{top_namespace}}}.api.service.authorisation import user_for_username
+
+
+def get_log(e=None):
+    return logging.getLogger("{0}.{1}".format(__name__, e) if e else __name__)
+
+
+def details_to_return(details):
+    """Only return the non-sensitive parts.
+
+    Don't raw return everything as this contains password hash and other
+    things not for display. Pick what is needed only.
+
+    """
+    return dict(
+        username=details['username'],
+        display_name=details['display_name'],
+        email=details['email'] if 'email' in details else '',
+        mobile=details['mobile'] if 'mobile' in details else '',
+        phone=details['phone'] if 'phone' in details else '',
+        time_zone=(details['time_zone'] if 'time_zone' in details
+                   else 'London'),
+    )
+
+
+@view_config(
+    route_name='user_profile', request_method='GET',
+    accept="text/html", renderer='profile.jinja2'
+)
+def user_profile(request):
+    """Display the current user profile.
+    """
+    log = get_log("user_profile")
+    user = request.user.api.user
+    username = request.matchdict['username'].strip().lower()
+    log.debug("recovering user details for <{0}>".format(username))
+
+    details = user.get(username)
+
+    log.debug(
+        "recovering user <{0}> OK. Returned a subset of user details.".format(
+            details['username']
+        )
+    )
+
+    return details_to_return(details)
+
+
+@view_config(
+    route_name='user_profile', request_method='GET', renderer='json',
+    accept="application/json",
+)
+@json_result
+def user_profile_data(request):
+    """Display the current user profile.
+    """
+    log = get_log("user_profile_data")
+
+    log.debug("checking that a login is present.")
+    logged_in_user = user_for_login(request)
+    log.info("logged in as '{}'".format(logged_in_user['username']))
+
+    account_to_access = user_for_username(request)
+    log.debug("looking for user <{0}>".format(account_to_access['username']))
+
+    return details_to_return(account_to_access)

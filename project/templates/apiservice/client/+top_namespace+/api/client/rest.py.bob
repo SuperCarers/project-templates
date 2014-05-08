@@ -1,0 +1,112 @@
+# -*- coding: utf-8 -*-
+"""
+This is the Public python client API that third parties would use.
+
+This provides the Python library which interfaces to the
+{{{top_namespace}}}-api-service over REST. It provides handling for token
+based access.
+
+Created: {{{created}}}
+
+"""
+import json
+import logging
+from urlparse import urljoin
+
+import requests
+from pp.apiaccesstoken.restclientside import RequestsAccessTokenAuth
+
+from {{{top_namespace}}}.api.client import utils
+from {{{top_namespace}}}.api.client import error
+from {{{top_namespace}}}.api.client.user import User
+
+
+def get_log(e=None):
+    return logging.getLogger("{0}.{1}".format(__name__, e) if e else __name__)
+
+
+class APIService(object):
+    """pypro API Access over REST.
+
+    Some operations will require access to private data. These api calls will
+    need set_auth() to have been called prior to use..
+
+    """
+    API_LOGIN = '/login/{}/'
+
+    def __init__(self, uri='http://localhost:{{{tcp_port}}}'):
+        """Set the base URI of the APIService.
+
+        :param uri: The base address of the remote service server.
+
+        """
+        self.log = get_log('APIService')
+        self.uri = uri
+        self.auth = None
+        self.user = User(self.uri, self.get_auth)
+
+    def get_auth(self):
+        """Recover the configured access auth instance."""
+        if not self.auth:
+            raise error.AccessTokenNotSet(
+                "No access token set! Please call set_auth() or login()."
+            )
+        return self.auth
+
+    def set_auth(self, access_token):
+        """Set the API access token for private data access."""
+        self.auth = RequestsAccessTokenAuth(access_token)
+
+    def clear_auth(self):
+        """Clear current the access token."""
+        self.auth = None
+
+    def login(self, username, password):
+        """Login recovering the access token for the username and password.
+
+        :param username: The uniqure username string.
+
+        :param password: The plain text password to verify.
+
+        On success this will call set_auth() with the recovered access_token.
+
+        :returns: The access_token recovered.
+
+        """
+        log = get_log("login")
+
+        # Internal network comms should be HTTPS only! Otherwise password would
+        # be available to sniffers!
+        log.debug("base64 encoding password.")
+        data = dict(password=passwo{{{top_namespace}}}.encode("base64"))
+
+        uri = urljoin(self.uri, self.API_LOGIN.format(username))
+        log.debug("contacting '{}'.".format(uri))
+
+        access_token = utils.json_response(
+            requests.post(uri, data=json.dumps(data), headers=utils.JSON_CT)
+        )
+
+        log.debug(
+            "API login OK for '{}'. Setting auth token.".format(username)
+        )
+        self.set_auth(access_token)
+
+        return access_token
+
+    def ping(self):
+        """Recover the API Service status page.
+
+        This will raise a connection error or it will return successfully.
+
+        :returns: service status dict.
+
+        """
+        log = get_log('ping')
+
+        uri = urljoin(self.uri, 'ping/')
+        log.debug("contacting '{}'".format(uri))
+
+        return utils.json_response(
+            requests.get(uri, headers=utils.JSON_CT)
+        )

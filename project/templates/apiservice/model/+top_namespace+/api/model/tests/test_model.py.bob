@@ -1,0 +1,5 @@
+# -*- coding: utf-8 -*-
+
+
+def test_jenkinstestpass_{{{random_string}}}():
+    assert 1 == 1

@@ -1,0 +1,19 @@
+# -*- coding: utf-8 -*-
+"""
+This is the Public python client API that third parties would use.
+
+Created: {{{created}}}
+
+"""
+
+
+class APIServiceError(Exception):
+    """The base class for REST API errors."""
+
+
+class AccessTokenNotSet(APIServiceError):
+    """Raised when not access token was set on an protected call."""
+
+
+class AccessDenied(APIServiceError):
+    """Raised when making a call to a protected resource."""
