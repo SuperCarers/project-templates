@@ -163,6 +163,94 @@ of the fabfile. Paver's command line handling is better and it allows task
 dependancies. I like the remote access in Fabric_.
 
 
+PythonPro Standard API REST Service
+-----------------------------------
+
+I need to document this more but the "apiservice" template is how PythonPro
+start a project which will need a public REST interface, with identity
+verification accessing public / private data.
+
+This also shows one way to scale horizontally. The "api" service acts as a
+proxy to specialised services run in a non public subnet. This one uses the
+user service. The following diagram shows the rough idea.
+
+.. image:: apiservice-architecture.jpg
+    :width: 50%
+    :align: center
+
+So the api acts as a proxy, verifying identity, using specialised services to
+perform specific operations in the background. This is similar approach taken
+by companies like Spotify. More services can be started as demand increases and
+load balance too.
+
+This api uses a running pp-user-service for its user identity authentification.
+The api allows web login or strong token based access::
+
+    # The user service needs to be running and its mongo db set up. You can
+    # then load fixtures into the service. Typically this looks like the
+    # following in the development environment:
+    #
+    cd /home/vagrant/src/<instance of service>/adminctl
+    mongo userservicedb  --eval 'db.dropDatabase()' && adminctl -c adminctl/config.ini load ../fixtures/universe.json
+
+    # The universe.json "user" section is loaded into the pp-user-service
+
+    # run the service
+    cd /home/vagrant/src/<instance of service>/service
+    pserve development.ini
+
+    # from another terminal using httpie:
+    http http://<running template instance>/account/bob/ "Content-Type:application/json" "X-ACCESS-TOKEN: eyJleHBpcmVzIjogMTAsICJzYWx0IjogImRiMzc1MiIsICJpZGVudGl0eSI6ICJib2IifRgjb1T9zyq_Cd4IRx7j8XPkWWBkYoJQ64bOWP3SCybuhcnJxjxzs3A1Dtf8fr9m8EEjdS-iXu0Z6rS3jA0tQeo="
+
+    HTTP/1.0 200 OK
+    Content-Length: 185
+    Content-Type: application/json; charset=UTF-8
+    Date: Thu, 08 May 2014 18:29:19 GMT
+    Server: PasteWSGIServer/0.5 Python/2.7.6
+
+    {
+        "data": {
+            "display_name": "PythonPro User",
+            "email": "bob@example.com",
+            "mobile": "",
+            "phone": "1234567890",
+            "time_zone": "London",
+            "username": "bob"
+        },
+        "message": "ok",
+        "success": true
+    }
+
+To generate a new instance to begin a new projects dev do::
+
+    # the project-templates needs to be in the environment.
+
+    $ mrbob project.templates:apiservice
+
+    Welcome to mr.bob interactive mode. Before we generate directory structure, some questions need to be answered.
+
+    Answer with a question mark to display help.
+    Values in square brackets at the end of the questions show the default value if there is no answer.
+
+
+    --> Top level namespace e.g. 'myproject, pp': tn
+
+    --> Python package below namespace e.g. api: api
+
+    :
+    lots of output
+    :
+    -api/service/tn/api/service/views/views.py
+    Generated file structure at /home/vagrant/src
+
+    $ ls -l tn-api
+
+Success. The second question should always be "api". I can't default it at
+moment and need to fix this. This project is set up in a similar fashion to
+the Pyramid REST Service template.
+
+
+
 .. _namespace: http://packages.python.org/distribute/setuptools.html#namespace-packages
 .. _templating: http://collective-docs.readthedocs.org/en/latest/misc/paster_templates.html
 .. _Paver: http://paver.github.com/paver/

@@ -78,7 +78,7 @@ class APIService(object):
         # Internal network comms should be HTTPS only! Otherwise password would
         # be available to sniffers!
         log.debug("base64 encoding password.")
-        data = dict(password=passwo{{{top_namespace}}}.encode("base64"))
+        data = dict(password=password.encode("base64"))
 
         uri = urljoin(self.uri, self.API_LOGIN.format(username))
         log.debug("contacting '{}'.".format(uri))
