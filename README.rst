@@ -22,6 +22,70 @@ You can pip install the latest code version::
   pip install http://github.com/pythonpro/project-templates/tarball/master#egg=project-templates
 
 
+Core Package
+------------
+
+This template creates namespaced packages from the project.templates.corepkg
+template::
+
+    mrbob project.templates:corepkg
+
+    Welcome to mr.bob interactive mode. Before we generate directory structure, some questions need to be answered.
+
+    Answer with a question mark to display help.
+    Values in square brackets at the end of the questions show the default value if there is no answer.
+
+
+    --> Project name e.g. my-fancy-package: web-authplugin
+
+    --> Python package namespace to use e.g. my.fancy.package: web.authplugin
+
+    Rendering /Users/oisin/src/project-templates/project/templates/corepkg/config.ini.bob to /Users/oisin/src/b0bc3d269dea0b7e/config.ini
+    Rendering /Users/oisin/src/project-templates/project/templates/corepkg/MANIFEST.in.bob to /Users/oisin/src/b0bc3d269dea0b7e/MANIFEST.in
+    Rendering /Users/oisin/src/project-templates/project/templates/corepkg/README.rst.bob to /Users/oisin/src/b0bc3d269dea0b7e/README.rst
+    Rendering /Users/oisin/src/project-templates/project/templates/corepkg/setup.py.bob to /Users/oisin/src/b0bc3d269dea0b7e/setup.py
+    mkdir /Users/oisin/src/b0bc3d269dea0b7e/authplugin
+    Rendering /Users/oisin/src/project-templates/project/templates/corepkg/+package+/__init__.py.bob to /Users/oisin/src/b0bc3d269dea0b7e/authplugin/__init__.py
+    mkdir /Users/oisin/src/b0bc3d269dea0b7e/authplugin/scripts
+    mkdir /Users/oisin/src/b0bc3d269dea0b7e/authplugin/tests
+    Copying /Users/oisin/src/project-templates/project/templates/corepkg/+package+/scripts/__init__.py to /Users/oisin/src/b0bc3d269dea0b7e/authplugin/scripts/__init__.py
+    Rendering /Users/oisin/src/project-templates/project/templates/corepkg/+package+/scripts/main.py.bob to /Users/oisin/src/b0bc3d269dea0b7e/authplugin/scripts/main.py
+    Copying /Users/oisin/src/project-templates/project/templates/corepkg/+package+/tests/__init__.py to /Users/oisin/src/b0bc3d269dea0b7e/authplugin/tests/__init__.py
+    Copying /Users/oisin/src/project-templates/project/templates/corepkg/+package+/tests/conftest.py to /Users/oisin/src/b0bc3d269dea0b7e/authplugin/tests/conftest.py
+    Copying /Users/oisin/src/project-templates/project/templates/corepkg/+package+/tests/test_+package+.py to /Users/oisin/src/b0bc3d269dea0b7e/authplugin/tests/test_authplugin.py
+    log: web-authplugin is in directory: /Users/oisin/src/b0bc3d269dea0b7e
+    log: Creating namespace package. Top level 'web'.
+    log: Copying package 'authplugin' into install_path '/Users/oisin/src/b0bc3d269dea0b7e/web-authplugin/web'.
+    log: Copying files into project_path '/Users/oisin/src/b0bc3d269dea0b7e/web-authplugin'.
+    cp: authplugin is a directory (not copied).
+    cp: web-authplugin is a directory (not copied).
+    log: Moving project '/Users/oisin/src/b0bc3d269dea0b7e/web-authplugin' into root '/Users/oisin/src'.
+    log: Cleaning up. Removing build dir '/Users/oisin/src/b0bc3d269dea0b7e'.
+    Generated file structure at /Users/oisin/src
+
+In the example above, there will now be a directory called web-authplugin. You can change into
+this and set it up in the environment::
+
+    cd web-authplugin/
+
+    python setup.py develop
+
+    python
+
+    Python 2.7.5 (default, Mar  9 2014, 22:15:05)
+    [GCC 4.2.1 Compatible Apple LLVM 5.0 (clang-500.0.68)] on darwin
+    Type "help", "copyright", "credits" or "license" for more information.
+    >>> import web
+    >>> web
+    <module 'web' from 'web/__init__.py'>
+    >>> import web.authplugin
+    >>> web.authplugin
+    <module 'web.authplugin' from 'web/authplugin/__init__.py'>
+    >>> exit()
+
+New code goes into the authplugin package. The web part is the namespace
+package, under which other packages might use.
+
 Pyramid REST Service
 --------------------
 
