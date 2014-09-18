@@ -84,7 +84,7 @@ this and set it up in the environment::
     >>> exit()
 
 New code goes into the authplugin package. The web part is the namespace
-package, under which other packages might use.
+package, under which other packages reside use.
 
 Pyramid REST Service
 --------------------
