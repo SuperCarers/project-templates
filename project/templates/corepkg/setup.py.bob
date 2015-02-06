@@ -17,7 +17,7 @@ Description = Summary
 ShortDescription = Summary
 
 needed = [
-    'sphinx', # for docs generation.
+    'sphinx',  # for docs generation.
 ]
 
 test_needed = [
@@ -29,10 +29,11 @@ EagerResources = [
     '{{{top}}}',
 ]
 
+ProjectScripts = []
 # Example including shell script out of scripts dir
-ProjectScripts = [
+#ProjectScripts = [
 #    '{{{namespaced_package}}}/scripts/somescript',
-]
+#]
 
 PackageData = {
     '': ['*.*'],
@@ -54,9 +55,7 @@ setup(
     description=ShortDescription,
     long_description=Description,
     classifiers=[
-      "Programming Language :: Python",
-      "Topic :: Internet :: WWW/HTTP",
-      "Topic :: Internet :: WWW/HTTP :: WSGI :: Application",
+        "Programming Language :: Python",
     ],
     keywords='web wsgi bfg pylons pyramid',
     license=License,
