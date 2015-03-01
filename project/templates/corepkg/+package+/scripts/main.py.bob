@@ -1,15 +1,11 @@
 # -*- coding: utf-8 -*-
 """
-Oisin Mulvihill
-2007-05-18
-
 """
 import os
 import sys
 import time
 import os.path
 import logging
-import ConfigParser
 import logging.config
 from optparse import OptionParser
 
@@ -21,7 +17,9 @@ def get_log():
 def logtoconsolefallback(log):
     # Log to console instead:
     hdlr = logging.StreamHandler()
-    formatter = logging.Formatter('%(asctime)s %(name)s %(levelname)s %(message)s')
+    formatter = logging.Formatter(
+        '%(asctime)s %(name)s %(levelname)s %(message)s'
+    )
     hdlr.setFormatter(formatter)
     log.addHandler(hdlr)
     log.setLevel(logging.DEBUG)
@@ -47,7 +45,11 @@ def main():
 
     # Load the system config:
     if not os.path.isfile(options.config_filename):
-        sys.stderr.write("The config file name '%s' wasn't found" % options.config_filename)
+        sys.stderr.write(
+            "The config file name '{}' wasn't found".format(
+                options.config_filename
+            )
+        )
         sys.exit(1)
 
     else:
