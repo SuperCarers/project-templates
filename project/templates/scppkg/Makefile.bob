@@ -9,18 +9,19 @@ BIN=${VIRTUALENV}/bin
 DOCKER_NAME=${PACKAGE}
 DOCKER_VERSION=${VERSION}
 DOCKER_IMAGE=${DOCKER_NAME}:${DOCKER_VERSION}
-PYPI_URL_WITH_AUTH=https://<need to set if using build-requirements.txt>
+PYPI_URL_WITH_AUTH=https://pypi.supercarers.com
 
 clean:
 	find . -iname '*.pyc' -exec rm {} \; -print
 
 install:
 	#pip install -i ${PYPI_URL_WITH_AUTH} -r build-requirements.txt
-	pip install -i ${PYPI_URL_WITH_AUTH} -r requirements.txt
+	#pip install -i ${PYPI_URL_WITH_AUTH} -r requirements.txt
 	python setup.py develop
 
 test_install: install
-	pip install -i ${PYPI_URL_WITH_AUTH} -r test-requirements.txt
+	#pip install -i ${PYPI_URL_WITH_AUTH} -r test-requirements.txt
+	pip install -r test-requirements.txt
 
 test: test_install
 	pytest --junitxml=tests/report.xml --cov=${IMPORT}
