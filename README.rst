@@ -18,7 +18,7 @@ Set up
 
 You can pip install the latest code version::
 
-  pip install http://github.com/pythonpro/project-templates/tarball/master#egg=project-templates
+  pip install http://github.com/supercarers/scp-project-templates/tarball/master#egg=scp-project-templates
 
 
 SCP Python Package
