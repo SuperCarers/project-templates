@@ -1,0 +1,51 @@
+===================================
+{{{project}}}
+===================================
+
+.. contents::
+
+
+Introduction
+------------
+
+This provides the namespaced package: {{{namespaced_or_package}}}
+
+All commands are in the ``Makefile``, so you will also need to install ``make``.
+
+Local
+~~~~
+
+You should first create a `virtualenv <http://python-guide-pt-br.readthedocs.io/en/latest/dev/virtualenvs/>`_ and activate it.
+
+.. code-block:: bash
+   make install
+
+Docker
+~~~~~~
+
+You must have ``docker`` installed.
+
+.. code-block:: bash
+   make docker_build
+
+
+Test
+----
+
+Local
+~~~~~
+
+To run all the tests
+
+.. code-block:: bash
+   make test
+
+You can use ``pytest`` to run individual tests.
+
+Docker
+~~~~~~
+
+To run all the tests
+
+.. code-block:: bash
+   make docker_test

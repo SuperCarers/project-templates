@@ -1,2 +1,0 @@
-[{{{name}}}-admin]
-url = http://localhost:{{{tcp_port}}}

@@ -56,7 +56,7 @@ def describe_pkg(package_name):
         package="",
         project="",
         top="",
-        namespaced_package="",
+        namespaced_or_package="",
         namespace_packages=[],
         depth=[],
     )
@@ -95,11 +95,14 @@ def describe_pkg(package_name):
     returned['egg'] = egg
     returned['package'] = package
     returned['project'] = project
-    returned['top'] = depth[0] if depth else ""
+    returned['top'] = depth[0] if depth else package
     nsp = ".".join((depth + [package])) if depth else ""
-    returned['namespaced_package'] = nsp
+    returned['namespaced_or_package'] = nsp
     returned['namespace_packages'] = namespace_packages
     returned['depth'] = depth
+
+    if not returned['namespaced_or_package']:
+        returned['namespaced_or_package'] = package
 
     return returned
 
@@ -141,7 +144,7 @@ def pre_render_function(configurator):
     variables['egg'] = description['egg']
     variables['namespace'] = depth[0] if depth else ''
     variables['top'] = description['top']
-    variables['namespaced_package'] = description['namespaced_package']
+    variables['namespaced_or_package'] = description['namespaced_or_package']
     variables['namespace_packages'] = description['namespace_packages']
     build_root = os.path.abspath(configurator.target_directory)
     rnd = os.urandom(8).encode('hex')
@@ -186,12 +189,11 @@ def post_render_function(configurator):
         # Make the pp-common-db/
         project_path = os.path.join(build_root, variables['project'])
         install_path = os.path.join(build_root, variables['project'])
-        generated_pkg = os.path.join(build_root, variables['package'])
         makedirs(install_path)
         os.chdir(install_path)
 
         # Now make the sub directories:
-        #print "---- %r " % variables['namespace_path']
+        print "---- %r " % variables['namespace_path']
         for path in variables['namespace_path']:
             makedirs(path)
             # change into this dir to make the next level down:
@@ -230,53 +232,7 @@ def post_render_function(configurator):
         os.chdir(root)
         os.system("rm -rf {}".format(build_root))
 
-
-def restservice_pre_render(configurator):
-    """
-    """
-    # print "Pre Render Variables In: ", configurator.variables
-    top_namespace = configurator.variables['top_namespace']
-    package = configurator.variables['package']
-    project = "{}-{}".format(top_namespace, package)
-    namespace = "{}.{}".format(top_namespace, package)
-    description = describe_pkg(namespace)
-
-    variables = {}
-    variables['created'] = datetime.datetime.now().strftime(
-        "%Y-%m-%dT%H:%M:%S"
-    )
-    variables['name'] = namespace
-    variables['capital_name'] = "".join(
-        x.capitalize() for x in [top_namespace, package]
-    )
-    variables['random_string'] = os.urandom(20).encode('hex')
-    variables['random_port'] = int(os.urandom(2).encode('hex'), 16)
-    while variables['random_port'] < 60000:
-        variables['random_port'] = int(os.urandom(2).encode('hex'), 16)
-    variables['tcp_port'] = str(variables['random_port'])
-    variables['project'] = project
-    variables['package'] = package
-    variables['egg'] = description['egg']
-    variables['namespace'] = namespace
-    variables['top_namespace'] = top_namespace
-    variables['namespaced_package'] = description['namespaced_package']
-    variables['namespace_packages'] = description['namespace_packages']
-    build_root = os.path.abspath(configurator.target_directory)
-    rnd = os.urandom(8).encode('hex')
-    variables['root'] = configurator.target_directory
-    variables['build_root'] = os.path.join(project)
-    # this is the directory which contains the other parts:
-    configurator.target_directory = variables['build_root']
-    makedirs(configurator.target_directory)
-
-    configurator.variables = variables
-
-    import pprint
-    print "Pre Render Variables Out: ", pprint.pprint(configurator.variables)
-
-
-def restservice_post_render(configurator):
-    """
-    """
-
-
+    else:
+        # Move the project directory into the root:
+        log("Moving '{}' into '{}'.".format(build_root, variables['project']))
+        os.system("mv {} {}".format(build_root, variables['project']))
