@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Setuptools script for project-templates
+Setuptools script for scp-project-templates (scp_project_templates)
 
 """
 import sys
@@ -10,37 +10,22 @@ from setuptools.command.test import test as TestCommand
 
 Name = 'scp-project-templates'
 ProjectUrl = ""
-Version = "1.0.0"
-Author = ''
-AuthorEmail = ''
+with open('VERSION') as fd:
+    Version = fd.read().strip()
+Author = 'SuperCarers'
+AuthorEmail = 'systems@supercarers.com'
 Maintainer = ''
-Summary = 'Templates for SuperCarers standardised package/service creation.'
+Summary = ''
 License = ''
 Description = Summary
 ShortDescription = Summary
 
-needed = [
-    'mr.bob',
-]
+with open('requirements.txt') as fd:
+    needed = fd.readlines()
 
-test_needed = [
-]
-
-test_suite = 'project.templates.tests'
-
-EagerResources = [
-    'project',
-]
-
-ProjectScripts = [
-]
-
-PackageData = {
-    '': ['*.*'],
-}
-
-# Web Entry points
 EntryPoints = """
+[console_scripts]
+    scp-project-templates = scp_project_templates.scripts.main:main
 """
 
 
@@ -66,24 +51,21 @@ class PyTest(TestCommand):
 setup(
     url=ProjectUrl,
     name=Name,
+    cmdclass={'test': PyTest},
     zip_safe=False,
     version=Version,
-    cmdclass={'test': PyTest},
     author=Author,
     author_email=AuthorEmail,
     description=ShortDescription,
     long_description=Description,
-    classifiers=["Programming Language :: Python"],
-    keywords='web wsgi bfg pylons pyramid',
+    classifiers=[
+        "Programming Language::Python",
+    ],
+    keywords='',
     license=License,
-    scripts=ProjectScripts,
     install_requires=needed,
-    tests_require=test_needed,
-    test_suite=test_suite,
     include_package_data=True,
     packages=find_packages(),
-    package_data=PackageData,
-    eager_resources=EagerResources,
     entry_points=EntryPoints,
-    namespace_packages=['project'],
+    namespace_packages=[],
 )

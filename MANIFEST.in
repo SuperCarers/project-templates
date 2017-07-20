@@ -1,2 +1,3 @@
+include VERSION
 include *.txt *.ini *.cfg *.rst
-recursive-include project *
+recursive-include scp_project_templates *
