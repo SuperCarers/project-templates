@@ -23,10 +23,7 @@ ShortDescription = Summary
 with open('requirements.txt') as fd:
     needed = fd.readlines()
 
-EntryPoints = """
-[console_scripts]
-    scp-project-templates = scp_project_templates.scripts.main:main
-"""
+EntryPoints = ""
 
 
 class PyTest(TestCommand):

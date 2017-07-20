@@ -1,6 +1,5 @@
-===================================
-scp-project-templates
-===================================
+Project Templates
+=================
 
 .. contents::
 
@@ -8,44 +7,47 @@ scp-project-templates
 Introduction
 ------------
 
-This provides the namespaced package: scp_project_templates
+Project layout templates for various types of python projects for speedy
+development bootstrapping. This uses the MrBob project behing the scenes.
 
-All commands are in the ``Makefile``, so you will also need to install ``make``.
-
-Local
-~~~~
-
-You should first create a `virtualenv <http://python-guide-pt-br.readthedocs.io/en/latest/dev/virtualenvs/>`_ and activate it.
-
-.. code-block:: bash
-   make install
-
-Docker
-~~~~~~
-
-You must have ``docker`` installed.
-
-.. code-block:: bash
-   make docker_build
+ * http://mrbob.readthedocs.org/en/latest/
 
 
-Test
-----
+Set up
+------
 
-Local
-~~~~~
+You can pip install the latest code version::
 
-To run all the tests
+  pip install http://github.com/supercarers/scp-project-templates/tarball/master#egg=scp-project-templates
 
-.. code-block:: bash
-   make test
 
-You can use ``pytest`` to run individual tests.
+SCP Python Package
+------------------
 
-Docker
-~~~~~~
+This create a SuperCarers standard python package for new projects. This could
+be plugged-into our Jenkins CI and uses Docker + Makefile to test the new
+package.::
 
-To run all the tests
+    $ mrbob scp_project_templates:scppkg
 
-.. code-block:: bash
-   make docker_test
+    Welcome to mr.bob interactive mode. Before we generate directory structure, some questions need to be answered.
+
+    Answer with a question mark to display help.
+    Values in square brackets at the end of the questions show the default value if there is no answer.
+
+
+    --> Project top level project name e.g. scp-newpackage, newpackage, etc.: scp-schema
+
+    --> Python package or namespace to use e.g. scp_newpackage or scp.new.package: scp_schema
+    :
+    lots of output
+    :
+    log: Moving '/home/vagrant/src/tmp/64cd44a40822889f' into 'scp-schema'.
+    Generated file structure at /home/vagrant/src/tmp
+
+The current directory will now contain the new package::
+
+    $ cd scp-schema
+    $ ls
+    build-requirements.txt  Dockerfile  Jenkinsfile  Makefile  MANIFEST.in  README.rst  requirements.txt  scp_schema  setup.cfg  setup.py  test-requirements.txt  VERSION
+
