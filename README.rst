@@ -24,10 +24,11 @@ You can pip install the latest code version::
 SCP Python Package
 ------------------
 
-This template creates namespaced packages from the project.templates.scppkg
-template::
+This create a SuperCarers standard python package for new projects. This could
+be plugged-into our Jenkins CI and uses Docker + Makefile to test the new
+package.::
 
-mrbob project.templates:scppkg
+    $ mrbob project.templates:scppkg
 
     Welcome to mr.bob interactive mode. Before we generate directory structure, some questions need to be answered.
 
