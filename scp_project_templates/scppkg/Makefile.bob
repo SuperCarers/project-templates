@@ -9,7 +9,7 @@ BIN=${VIRTUALENV}/bin
 DOCKER_NAME=${PACKAGE}
 DOCKER_VERSION=${VERSION}
 DOCKER_IMAGE=${DOCKER_NAME}:${DOCKER_VERSION}
-PYPI_URL_WITH_AUTH=https://pypi.supercarers.com
+PYPI_URL_WITH_AUTH?=https://pypi.supercarers.com
 
 clean:
 	find . -iname '*.pyc' -exec rm {} \; -print

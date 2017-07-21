@@ -13,7 +13,9 @@ ADD test-requirements.txt .
 ADD setup.py .
 ADD . .
 
-RUN make install
+# build time only:
+ARG PYPI_URL_WITH_AUTH
+RUN make PYPI_URL_WITH_AUTH=${PYPI_URL_WITH_AUTH} install
 
 USER scp
 CMD make test
